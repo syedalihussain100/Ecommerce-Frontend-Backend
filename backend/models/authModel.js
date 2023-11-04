@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const userSchema = new Schema({
     name: {
@@ -77,7 +78,6 @@ userSchema.methods.getResetPasswordToken = function () {
 
     return resetToken;
 };
-
 
 
 const UserModel = mongoose.model("User", userSchema);

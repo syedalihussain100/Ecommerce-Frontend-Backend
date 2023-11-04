@@ -2,13 +2,16 @@ import React from "react";
 import logo from "../../components/images/logo.png";
 import { CiLocationOn } from "react-icons/ci";
 import { AiOutlineUser, AiOutlineShoppingCart } from "react-icons/ai";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
     <>
       {/* first */}
       <div className="flex justify-center items-center py-1 pb-3">
-        <p className="font-bold text-lg text-[#a5cd40]">🚨FREE CREATINE WHEN YOU SPEND $120 ON MAX'S SUPPLEMENTS🚨</p>
+        <p className="font-bold text-lg text-[#a5cd40]">
+          🚨FREE CREATINE WHEN YOU SPEND $120 ON MAX'S SUPPLEMENTS🚨
+        </p>
       </div>
       {/* second */}
       <div className="flex justify-between items-center px-5">
@@ -24,13 +27,21 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-16">
           <div className="flex items-center px-3 gap-3 cursor-pointer hover:text-[#a5cd40]">
-            <CiLocationOn style={{ fontSize: "1.7rem" }} className="text-[#a5cd40]"/>
+            <CiLocationOn
+              style={{ fontSize: "1.7rem" }}
+              className="text-[#a5cd40]"
+            />
             <p className="font-bold">FIND A STORE</p>
           </div>
-          <div className="flex items-center gap-3 cursor-pointer hover:text-[#a5cd40]">
-            <AiOutlineUser style={{ fontSize: "1.7rem" }} className="text-[#a5cd40]"/>
-            <p className="font-bold">MY ACCOUNT</p>
-          </div>
+          <Link to="/register">
+            <div className="flex items-center gap-3 cursor-pointer hover:text-[#a5cd40]">
+              <AiOutlineUser
+                style={{ fontSize: "1.7rem" }}
+                className="text-[#a5cd40]"
+              />
+              <p className="font-bold">MY ACCOUNT</p>
+            </div>
+          </Link>
           {/* third part here */}
           <div className="flex">
             <div className="w-12 h-10 bg-[#EFEFEF] flex">

@@ -6,6 +6,9 @@ const cors = require("cors");
 const PORT = process.env.PORT || 4000
 const mongoose = require("mongoose");
 
+// routing import here
+const userRoute = require("./routes/userRoute");
+
 
 // middleware here
 app.use(express.json())
@@ -17,6 +20,8 @@ app.use(cors());
 
 // routes here calling 
 
+
+app.use(userRoute)
 
 
 // database connected here

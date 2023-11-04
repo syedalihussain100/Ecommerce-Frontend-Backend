@@ -2,6 +2,7 @@ const { UserModel } = require("../models/authModel");
 const asyncHandler = require("express-async-handler");
 const crypto = require("crypto");
 const sendEmail = require("../utils/SendEmails");
+const generateToken = require("../config/token/Token");
 
 
 // register
@@ -77,7 +78,7 @@ const fetchuserCtl = asyncHandler(async (req, res) => {
 
 const userDetailsCtl = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    userValidId(id);
+    // userValidId(id);
     try {
         const userDetails = await UserModel.findById(id);
 
@@ -103,13 +104,11 @@ const forgetPassword = asyncHandler(async (req, res) => {
 
     if (!user) throw new Error("User not Found");
 
-    const resetToken = await UserModel.getResetPasswordToken();
+    const resetToken = await user.getResetPasswordToken();
 
     await user.save({ validateBeforeSave: false });
 
-    const resetPasswordUrl = `${req.protocol}://${req.get(
-        "host"
-    )}/password/reset/${resetToken}`;
+    const resetPasswordUrl = `http://localhost:4000/password/reset/${resetToken}`;
 
     const message = `Your Password reset token is :- \n\n  ${resetPasswordUrl} \n\n If you are not requested this email then, please ignore it.`;
 
@@ -160,5 +159,4 @@ const passwordReset = asyncHandler(async (req, res) => {
     res.status(200).send(user);
 });
 
-
-module.exports = { userRegisterCtl, userLoginCtl, fetchuserCtl, userDetailsCtl,forgetPassword,passwordReset }
+module.exports = { userRegisterCtl, userLoginCtl, fetchuserCtl, userDetailsCtl, forgetPassword, passwordReset }
