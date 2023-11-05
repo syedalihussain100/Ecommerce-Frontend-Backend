@@ -19,13 +19,12 @@ const userSchema = new Schema({
         required: true,
         trim: true
     },
-    isAdmin: {
-        type: Boolean,
-        default: false,
-    },
     role: {
         type: String,
-        enum: ["Admin", "user"],
+        default: "user"
+    },
+    refreshToken: {
+        type: String,
     },
     passwordChangeAt: Date,
     passwordRessetToken: String,

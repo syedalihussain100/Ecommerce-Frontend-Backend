@@ -3,6 +3,7 @@ const asyncHandler = require("express-async-handler");
 const crypto = require("crypto");
 const sendEmail = require("../utils/SendEmails");
 const generateToken = require("../config/token/Token");
+const { generateRefreshToken } = require("../config/token/RefreshToken");
 
 
 // register
@@ -93,7 +94,8 @@ const userDetailsCtl = asyncHandler(async (req, res) => {
 });
 
 
-// forget password functionality
+// Forget Password
+
 
 const forgetPassword = asyncHandler(async (req, res) => {
     // find the user by email
@@ -108,7 +110,7 @@ const forgetPassword = asyncHandler(async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
-    const resetPasswordUrl = `http://localhost:4000/password/reset/${resetToken}`;
+    const resetPasswordUrl = `http://localhost:3000/password/reset/${resetToken}`;
 
     const message = `Your Password reset token is :- \n\n  ${resetPasswordUrl} \n\n If you are not requested this email then, please ignore it.`;
 
@@ -128,35 +130,96 @@ const forgetPassword = asyncHandler(async (req, res) => {
     }
 });
 
-const passwordReset = asyncHandler(async (req, res) => {
-    // create token hash
+// Reset Password
 
-    const ResetPasswordToken = crypto
-        .createHash("sha256")
-        .update(req.params.token)
-        .digest("hex");
-
+const resetPassword = asyncHandler(async (req, res) => {
+    const { password } = req.body;
+    const { token } = req.params;
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
     const user = await UserModel.findOne({
-        ResetPasswordToken,
+        passwordRessetToken: hashedToken,
         passwordResetExpires: { $gt: Date.now() },
     });
-
-    if (!user) {
-        res.status(400);
-        throw new Error("Reset Password Token is inValid or has been expired");
-    }
-
-    if (req.body.password !== req.body.confirmPassword) {
-        res.status(400);
-        throw new Error("Password does not match");
-    }
-
-    user.password = req.body.password;
+    if (!user) throw new Error(" Token Expired, Please try again later");
+    user.password = password;
     user.passwordRessetToken = undefined;
     user.passwordResetExpires = undefined;
-
     await user.save();
-    res.status(200).send(user);
+    res.json(user);
 });
 
-module.exports = { userRegisterCtl, userLoginCtl, fetchuserCtl, userDetailsCtl, forgetPassword, passwordReset }
+
+
+// admin
+
+const loginAdmin = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    // check if user exists or not
+    const findAdmin = await UserModel.findOne({ email });
+    if (findAdmin.role !== "admin") throw new Error("You are not Admin");
+    if (findAdmin && (await findAdmin.isPasswordmatch(password))) {
+        const refreshToken = await generateRefreshToken(findAdmin?._id);
+        const updateuser = await UserModel.findByIdAndUpdate(
+            findAdmin.id,
+            {
+                refreshToken: refreshToken,
+            },
+            { new: true }
+        );
+        res.json({
+            _id: findAdmin?._id,
+            name: findAdmin?.name,
+            email: findAdmin?.email,
+            token: generateToken(findAdmin?._id),
+        });
+    } else {
+        throw new Error("Invalid Credentials");
+    }
+});
+
+
+// Update a user
+
+const updatedUser = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+
+    try {
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            _id,
+            {
+                name: req?.body?.name,
+                email: req?.body?.email,
+            },
+            {
+                new: true,
+            }
+        );
+        res.json(updatedUser);
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+
+// logout functionality here
+
+
+
+// delete user 
+
+const deleteaUser = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    try {
+        const deleteaUser = await UserModel.findByIdAndDelete(id);
+        res.json({
+            deleteaUser,
+        });
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+
+
+
+module.exports = { userRegisterCtl, userLoginCtl, fetchuserCtl, userDetailsCtl, forgetPassword, resetPassword, loginAdmin, updatedUser, deleteaUser }
