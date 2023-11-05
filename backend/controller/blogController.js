@@ -8,8 +8,23 @@ const { blogModel } = require("../models/blogModel");
 
 const createBlog = asyncHandler(async (req, res) => {
     try {
-        const newBlog = await blogModel.create(req.body);
-        res.json(newBlog);
+        const uploader = (path) => cloudinaryUploadImg(path, 'images');
+        const urls = [];
+        const files = req.files;
+        for (const file of files) {
+            const { path } = file;
+            const newpath = await uploader(path);
+            console.log(newpath);
+            urls.push(newpath);
+            fs.unlinkSync(path);
+        }
+        const newBlog = new blogModel({
+            title: req.body.title,
+            description: req.body.description,
+            images: urls,
+        });
+        const savedBlog = await newBlog.save();
+        res.json(savedBlog);
     } catch (error) {
         throw new Error(error);
     }
@@ -64,4 +79,4 @@ async function uploadImages(req, res, next) {
 
 
 
-module.exports = { createBlog,uploadImages }
+module.exports = { createBlog, uploadImages }

@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 // routing import here
 const userRoute = require("./routes/userRoute");
 const blogRoute = require("./routes/blogRoute");
+const uploadRoute = require("./routes/UploadRoute");
 
 // middleware here
 app.use(express.json())
@@ -21,9 +22,9 @@ app.use(cors());
 // routes here calling 
 
 
-app.use("/user",userRoute);
-app.use("/blog",blogRoute);
-
+app.use("/user", userRoute);
+app.use("/blog", blogRoute);
+app.use("/upload", uploadRoute);
 
 // database connected here
 mongoose.connect(process.env.MONGODB).then((res) => {
