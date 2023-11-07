@@ -31,52 +31,63 @@ const createBlog = asyncHandler(async (req, res) => {
 });
 
 
+// all blog
 
-// upload images with cloudniary
+const AllBlogs = asyncHandler(async (req, res) => {
 
-async function uploadImages(req, res, next) {
     try {
-        const { id } = req.params;
-
-        const uploader = async (path) => {
-            try {
-                const newpath = await cloudinaryUploadImg(path, "images");
-                return newpath;
-            } catch (error) {
-                throw new Error("Image upload failed");
-            }
-        };
-
-        const urls = [];
-        const files = req.files;
-
-        for (const file of files) {
-            const { path } = file;
-            const newpath = await uploader(path);
-            console.log(newpath);
-            urls.push(newpath);
-            fs.unlinkSync(path);
-        }
-
-        const findBlog = await blogModel.findByIdAndUpdate(
-            id,
-            {
-                images: urls.map((file) => {
-                    return file;
-                }),
-            },
-            {
-                new: true,
-            }
-        );
-
-        res.json(findBlog);
+        const getAllBlog = await blogModel.find({});
+        res.status(200).send(getAllBlog);
     } catch (error) {
-        res.status(400).send(error.message);
+        throw new Error(error)
     }
-}
+})
+
+
+// get per id blogs
+
+const getIdBlog = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const getBlog = await blogModel.findById(id);
+
+        res.status(200).send(getBlog);
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+
+
+// update blog here
+
+const updateBlog = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    try {
+        const updateBlog = await blogModel.findByIdAndUpdate(id, req.body, {
+            new: true,
+        });
+        res.json(updateBlog);
+    } catch (error) {
+        throw new Error(error);
+    }
+});
+
+
+// delete Blog here
+
+
+const deleteBlog = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    try {
+        const deletedBlog = await blogModel.findByIdAndDelete(id);
+        res.json(deletedBlog);
+    } catch (error) {
+        throw new Error(error);
+    }
+});
 
 
 
 
-module.exports = { createBlog, uploadImages }
+module.exports = { createBlog, getIdBlog, AllBlogs, updateBlog, deleteBlog }
